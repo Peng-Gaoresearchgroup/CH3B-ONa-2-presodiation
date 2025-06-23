@@ -1,13 +1,12 @@
-# Title
+# CH3B-ONa-2-presodiation
 ### Introduction
-
+This is the code for the "A Novel Strategy of Presodiation for Practical Sodium Batteries with In-situ Forming Boron-Based Protective Layer" for Z. Zheng et al.
 ### Contents
-The project is as follows：
 ```
 ├── main.py 
 ├── utils.py
 ├── conf/
-│   └── conf.yaml    # global configuration information, such as file storage paths and model hyperparameters
+│   └── conf.yaml    # global configuration, such as file storage paths and model hyperparameters
 ├── data/
 │   ├── data.csv    # input samples for hierarchical clustering and KMeans clustering
 │   └── recommend_cluster.csv    # 195 molecules recommended by KMeans
