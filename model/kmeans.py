@@ -150,4 +150,27 @@ class kmeans:
         info=pd.DataFrame(cluster_data)
         info.to_csv(save,index=False)
         return info
+    
+    def get_t_sne(self,data, sample_ids=None, perplexity=30, random_state=0):
+
+        if self.labels_ is None:
+            raise ValueError("Fit first!")
+        
+        from sklearn.manifold import TSNE
+        tsne = TSNE(n_components=2, perplexity=perplexity, random_state=random_state)
+        tsne_result = tsne.fit_transform(data)
+
+        n_samples = data.shape[0]
+        if sample_ids is None:
+            sample_ids = list(range(n_samples))
+
+        df = pd.DataFrame({
+            'id': sample_ids,
+            'cluster': self.labels_,
+            'X': tsne_result[:, 0],
+            'Y': tsne_result[:, 1]
+        })
+        df = df.sort_values(by='cluster')
+        return df
+
 
