@@ -19,7 +19,6 @@ def mw_distribution(smiles_list):
 
     return X, Y,molecular_weights
 
-
 def element_distribution(smiles_list):
     element_counter = Counter()
     total_atoms = 0
@@ -76,45 +75,4 @@ def selected_clusters(li=[0,4,8,11,12,14]):
 
 if __name__=='__main__':
     selected_clusters()
-    
-
-
-    # df=pd.read_csv('./data/data.csv')
-    # smiles_list=df['canonicalsmiles'].to_list()
-    # mw_X,mw_Y,mw=mw_distribution(smiles_list)
-    # el_X,el_Y=element_distribution(smiles_list)
-    # print(mw)
-    # df7=pd.DataFrame({"mw":mw})
-    # df7.to_csv('./1.csv',index=False)
-    # df2=pd.DataFrame({'Mw':mw_X,'Frequency':mw_Y})
-    # df2.to_csv('./outputs/analyze_mw.csv',index=False)
-
-    # df2=pd.DataFrame({'Element':el_X,'Ratio':el_Y})
-    # df2.to_csv('./outputs/analyze_element.csv',index=False)
-
-    # df=pd.read_csv('/home/zzl/ZZL-CLUSTER/ProjectName/outputs/kmeans_plot_information.csv')
-    # l=df['0_Molecule'].to_list()
-    # # d=dict(zip(df['0_Cluster'].to_list(),df['0_Molecule'].to_list()))
-    # df2=pd.read_csv('/home/zzl/ZZL-CLUSTER/ProjectName/data/data.csv')
-    # df3=pd.read_csv('/home/zzl/ZZL-CLUSTER/DFT/Repersent_mol_16cluster/result.csv')
-    # df4=pd.read_csv('/home/zzl/ZZL-CLUSTER/ProjectName/outputs/rank_absolute.csv')
-    # # print(d)
-    # mols=[]
-    # scs=[]
-    # capa=[]
-    # bwt=[]
-    # al=[]
-    # for mol in df4['molecule'].to_list():
-    #     if mol in l:
-    #         mols.append(mol)
-    #         scs.append(5-df4[df4['molecule']==mol]['scscore'].values[0])
-    #         capa.append(df4[df4['molecule']==mol]['capacity(mAh/g)'].values[0])
-    #         bwt.append(df4[df4['molecule']==mol]['B_wt(%)'].values[0])
-    #         al.append(df4[df4['molecule']==mol]['anode_limit'].values[0])
-    # df5=pd.DataFrame({'mol':mols,
-    #                  'scs':scs,
-    #                  'capa':capa,
-    #                  'bwt':bwt,
-    #                  'al':al})
-    # df5.to_csv('./1.csv',index=False)
     pass

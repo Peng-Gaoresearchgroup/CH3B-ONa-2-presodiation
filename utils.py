@@ -209,44 +209,48 @@ def get_scscore(smiles,tar=['sascore','scscore','spatial']):
             state = data["state"]
             result =data["output"]["result"]
             if state == "SUCCESS":
-                print(f"Get sucess: {re2.status_code}")
+                print(f"Sucess: {re2.status_code}")
                 return [float(result[0][i]) for i in tar]
             else:
-                print(f"Get failed: {re2.status_code}")
-                return None
+                print(f"Failed: {re2.status_code}")
+                return [None for i in tar]
+        else:
+            print(f"Get failed: {re2.status_code}")
+            return [None for i in tar]
     else:
         print(f"Post failed: {re1.status_code}")
-        return None
+        return [None for i in tar]
+
 
 def get_specific_capacity(smiles):
-        def ck_Natype(smiles=smiles):
-            mol = Chem.MolFromSmiles(smiles)
-            if mol is None:
-                raise ValueError("Invalid SMILES string")
+    def ck_Natype(smiles=smiles):
+        mol = Chem.MolFromSmiles(smiles)
+        if mol is None:
+            raise ValueError("Invalid SMILES string")
 
-            na_indices = [atom.GetIdx() for atom in mol.GetAtoms() if atom.GetSymbol() == 'Na']
-            na_idx_map = {idx: i for i, idx in enumerate(na_indices)}
+        na_indices = [atom.GetIdx() for atom in mol.GetAtoms() if atom.GetSymbol() == 'Na']
+        na_idx_map = {idx: i for i, idx in enumerate(na_indices)}
 
-            pattern = Chem.MolFromSmarts("[Na]-O-B-O-[Na]")
-            matches = mol.GetSubstructMatches(pattern)
-            na_types = [1] * len(na_indices)
-            
-            if matches:
-                na1, _, _, _, na2 = matches[0]
-                if na1 in na_idx_map:
-                    na_types[na_idx_map[na1]] = 0
-                if na2 in na_idx_map:
-                    na_types[na_idx_map[na2]] = 1
+        pattern = Chem.MolFromSmarts("[Na]-O-B-O-[Na]")
+        matches = mol.GetSubstructMatches(pattern)
+        na_types = [1] * len(na_indices)
+        
+        if matches:
+            na1, _, _, _, na2 = matches[0]
+            if na1 in na_idx_map:
+                na_types[na_idx_map[na1]] = 0
+            if na2 in na_idx_map:
+                na_types[na_idx_map[na2]] = 1
 
-            return na_types
-        na_types=ck_Natype()
-        mol=Chem.MolFromSmiles(smiles)
-        mol=Chem.AddHs(mol)
-        mol_weight = Descriptors.MolWt(mol)
-        Na_num = sum(1 for i in na_types if i ==1)
-        # Na_num = len(na_types)
-        specific_capacity=Na_num*96500/(3.6*mol_weight)
-        return specific_capacity
+        return na_types
+    na_types=ck_Natype()
+    mol=Chem.MolFromSmiles(smiles)
+    mol=Chem.AddHs(mol)
+    mol_weight = Descriptors.MolWt(mol)
+    Na_num = sum(1 for i in na_types if i ==1)
+    # Na_num = len(na_types)
+    specific_capacity=Na_num*96500/(3.6*mol_weight)
+    return specific_capacity
 
 
 def get_battery_freindless(smiles,elemnts):
@@ -276,11 +280,6 @@ def get_anode_limit_score(al,min,max):
 #-----------------------------------------------------
 # Data analyze
 #-----------------------------------------------------
-
-def get_representative_mol(df,save):
-    result = df.loc[df.groupby('Cluster')['Distance_to_center'].idxmin(), ['Molecule','Cluster','data','Cluster_center','Distance_to_center']]
-    result.to_csv(save,index=False)
-    return result
 
 def get_confusion_matrix(dict_hc=None, dict_kmeans=None):
     if dict_hc ==None:
@@ -371,16 +370,10 @@ def get_rank_data(df,input_path):
         scs,sas,spacail=data[0],data[1],data[2]
         record.append({'scscore':scs,'sascore':sas,'spacial_score':spacail})
         # print(record)
+    
     df2=pd.DataFrame(record)
     df2=df2.reset_index(drop=True)
-    # new_df=pd.DataFrame
-    # df['sascore']=df['canonicalsmiles'].apply(lambda x: get_scscore(x)[0])
-    # df['scscore']=df['canonicalsmiles'].apply(lambda x: get_scscore(x)[1])
-    # df['spacial score']=df['canonicalsmiles'].apply(lambda x: get_scscore(x)[2])
-    # df['anode_limit']=DFT_df['AnodeLimit(V)'].apply(lambda x :get_anode_limit_score(x,min=2.8,max=3.8))
-    
     df3=pd.concat([df,df2],ignore_index=True)
-    # df['B_wt(%)']=df['canonicalsmiles'].apply(lambda x:get_B_wt(x))
     return df3
 
 def rank(df):

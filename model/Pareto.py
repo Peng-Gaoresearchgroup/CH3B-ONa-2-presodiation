@@ -1,6 +1,6 @@
 import pandas as pd
 class Pareto:
-    def __init__(self, df, target_cols=['scscore','spacial_score','capacity(mAh/g)'],info_cols=['idx','canonicalsmiles','cluster']):
+    def __init__(self, df, target_cols=['scscore','spacial_score','capacity'],info_cols=['Molecule','canonicalsmiles','Cluster']):
         def origin2tar(li):
             li[2]=-li[2]
             # li[3]=-li[3]

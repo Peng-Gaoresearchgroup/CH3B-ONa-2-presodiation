@@ -7,7 +7,7 @@ from scipy.cluster import hierarchy
 from collections import defaultdict
 
 class hierarchical_clustering:
-    def __init__(self, method="ward",distance=0.5,partition_line=0.2):
+    def __init__(self,X,distance,partition_line,method="ward",):
         """
         Initialize the hierarchical clustering model.
         :param method: "single", "complete", "average", "ward", 等
@@ -17,22 +17,22 @@ class hierarchical_clustering:
         self.distance=distance
         self.model=None
         self.partition_line=partition_line
-        
-    def _fit(self, X):
+        self.X=X
+    def _fit(self):
 
-        if isinstance(X, pd.DataFrame):
-            X = X.values
-        self.p=len(X)
+        if isinstance(self.X, pd.DataFrame):
+            self.X = self.X.values
+        self.p=len(self.X)
 
         self.model = AgglomerativeClustering(
             distance_threshold=self.distance,
             n_clusters=None
         )
-        self.model.fit(X)
+        self.model.fit(self.X)
 
         self._build_valid_linkage() 
     
-    def plot_dendrogram(self, figsize=(10, 7), dpi=400, treelw=0.5, borderlw=0.25, fontname="Arial", fontsize=10,save='./output/hc_dendro.png'):
+    def plot_dendrogram(self,save,figsize=(10, 7), dpi=400, treelw=0.5, borderlw=0.25, fontname="Arial", fontsize=2):
         if self.linkage_matrix is None:
             raise ValueError("Model has not been fitted. Please call 'fit' before plotting.")
         plt.figure(figsize=figsize)
@@ -66,7 +66,7 @@ class hierarchical_clustering:
         plt.savefig(save,format='png',dpi=dpi,bbox_inches='tight',transparent=False)
         # plt.show()
 
-    def group_mapping(self, save='./outputs/hc_infor.csv'):
+    def group_mapping(self):
         if self.linkage_matrix is None:
             raise RuntimeError("fit before group_mapping")
         if not hasattr(self, 'partition_line'):
@@ -78,7 +78,7 @@ class hierarchical_clustering:
         
         unique_labels = np.unique(labels, return_inverse=True)[1]
         mapping = pd.DataFrame({"Molecule": range(len(unique_labels)), "Cluster": unique_labels})
-        mapping.to_csv(save, index=False)
+        # mapping.to_csv(save, index=False)
         grouped = mapping.groupby('Cluster')['Molecule'] \
                .agg(lambda x: ', '.join(x.astype(str))) \
                .sort_index()
@@ -87,9 +87,9 @@ class hierarchical_clustering:
         [f"Cluster{group}: {samples}" 
          for group, samples in grouped.items()]
         )
-        print('hc_information:\n',summary_str)
-        with open('./outputs/hc_infor.txt', 'w') as f:
-            f.write(summary_str)
+        # print('hc_information:\n',summary_str)
+        # with open('./outputs/hc_infor.txt', 'w') as f:
+            # f.write(summary_str)
         return mapping
     
     
@@ -110,3 +110,7 @@ class hierarchical_clustering:
             distances,
             node_counts[n_leaves:] 
         ]).astype(float)
+    
+    def get_n_cluster(self):
+        df=self.group_mapping()
+        return df['Cluster'].max()+1

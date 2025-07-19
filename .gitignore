@@ -1,3 +1,7 @@
 __pycache__/
 model/__pycache__/
 data/DFT_result.csv
+data/PubChem_compound_smiles_substructure_\[B\]\[C\].csv
+data/PubChem_compound_smiles_substructure_\[B\]\[O\].csv
+test.py
+experiment.py
