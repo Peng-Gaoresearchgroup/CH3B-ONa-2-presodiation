@@ -1,8 +1,7 @@
 #Random seed
 seed: 42
-rank : False
 data_path : './data/data.csv'
-dft_status: False
+dft_status: True
 dft_data_path: './data/result_mn15_def2tzvp.csv'
 anode_limit_lower: 2.8
 anode_limit_upper: 3.8

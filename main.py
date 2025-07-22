@@ -5,7 +5,7 @@ import utils
 from model import hc, kmeans,pca,Pareto
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-import joblib,random,argparse,sys
+import joblib,random,sys
 import numpy as np
 
 def load_conf():
