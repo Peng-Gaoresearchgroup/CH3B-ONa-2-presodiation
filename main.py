@@ -55,7 +55,7 @@ def get_best_k_by_ch(km:kmeans.kmeans,partition_k):
 def get_demension_explained_variance(data,pca_model):
     demension=[]
     accumalative_explained_variance_ratio=[]
-    for i in range(2,data.shape[1]):
+    for i in range(1,data.shape[1]):
         pca_model.n_components=i
         pca_model.fit()
         demension.append(i)
@@ -89,7 +89,7 @@ def rank_after_pareto(front,conf):
     front[['normal_scscore','normal_spacial_score','normal_capacity']]=front[['scscore','spacial_score','capacity']].apply(lambda x: (x-x.min())/(x.max()-x.min()))
     front['total_score']=-front['normal_scscore']-front['normal_spacial_score']+front['normal_capacity']+front['normal_anode_limit']
     front=front.sort_values(by='total_score',ascending=False)
-    rank=front[['Molecule','Cluster','canonicalsmiles','scscore','spacial_score','capacity','anode_limit','total_score']]
+    rank=front[['Molecule','Cluster','canonicalsmiles','scscore','spacial_score','capacity','anode_limit','normal_scscore','normal_spacial_score','normal_capacity','normal_anode_limit','total_score']]
     return rank
 
 def quick_test():
@@ -132,6 +132,7 @@ def quick_test():
     # Rank
     print('\nRank snapshot:')
     rank=rank_after_pareto(front=front,conf=conf)
+    rank.to_csv('./outputs/rank.csv',index=False)
     print(rank)
     print(f"Optimal molecule:{rank['canonicalsmiles'][0]}")
     print(f"Anode limit(V vs Na+/Na):{rank['anode_limit'][0]}")
@@ -163,7 +164,7 @@ def main():
     hc_model=hc.hierarchical_clustering(X=features,method=conf.hc.method,distance=conf.hc.distance,partition_line=0)
     partition_k=get_partition_k_from_hc(hc_model,range=[3,10.5,0.1])
     km=kmeans.kmeans(data=features,n_clusters=2,max_iter=conf.kmeans.max_iter)
-    partition_k=get_best_k_by_ch(features,km,partition_k,conf)
+    partition_k=get_best_k_by_ch(km,partition_k)
     # print(partition_k)
 
     # choose best k for kmeans
@@ -186,25 +187,6 @@ def main():
     t_sne=km.get_t_sne()
     heatmap=km.get_heatmap()
 
-    
-    if conf.dft_status==True:
-        # choose recommmedation molecules
-        dft=pd.read_csv(conf.dft_data_path)
-        recommend_mols=choose_recommend_mols(df=dft,lower_limit=conf.anode_limit_lower,upper_limit=conf.anode_limit_upper)
-        
-        # Pareto fliter
-        recommend_mols[['scscore','spacial_score']]= recommend_mols['canonicalsmiles'].apply(lambda x : pd.Series(utils.get_scscore(x,tar=['scscore','spatial'])))
-        recommend_mols['capacity']=recommend_mols['canonicalsmiles'].apply(utils.get_specific_capacity)
-        joblib.dump(recommend_mols,'./model/quick_test/recommend_mols.pkl')
-        p=Pareto.Pareto(df=recommend_mols)
-        joblib.dump(p,'./model/quick_test/pareto_model.pkl')
-        front=p.pareto_front()
-        joblib.dump(front,'./model/quick_test/pareto_front.pkl')
-        front.to_csv('./outputs/pareto_front.csv',index=False)
-        
-        # Rank
-        rank=rank_after_pareto(front=front,conf=conf)
-        rank.to_csv('./outputs/rank.csv')
     # save files
     des=pd.concat([mols[['idx','canonicalsmiles']],des])\
         .to_csv('./outputs/descriptors.csv',index=False)
@@ -218,6 +200,28 @@ def main():
     t_sne.to_csv('./outputs/kmeans_t_sne.csv',index=False)
     heatmap.to_csv('./outputs/kmeans_heatmap.csv',index=False)
     hc_info.to_csv('./outputs/hc_info.csv',index=False)
+
+    
+    if conf.dft_status==True:
+        # choose recommmedation molecules
+        dft=pd.read_csv(conf.dft_data_path)
+        recommend_mols=choose_recommend_mols(df=dft,lower_limit=conf.anode_limit_lower,upper_limit=conf.anode_limit_upper)
+        
+        # Pareto fliter
+        recommend_mols[['scscore','spacial_score']]= recommend_mols['canonicalsmiles'].apply(lambda x : pd.Series(utils.get_scscore(x,tar=['scscore','spatial'])))
+        recommend_mols['capacity']=recommend_mols['canonicalsmiles'].apply(utils.get_specific_capacity)
+        recommend_mols.to_csv('./outputs/recommend_mols.csv',index=False)
+        joblib.dump(recommend_mols,'./model/quick_test/recommend_mols.pkl')
+        p=Pareto.Pareto(df=recommend_mols)
+        joblib.dump(p,'./model/quick_test/pareto_model.pkl')
+        front=p.pareto_front()
+        joblib.dump(front,'./model/quick_test/pareto_front.pkl')
+        front.to_csv('./outputs/pareto_front.csv',index=False)
+        
+        # Rank
+        rank=rank_after_pareto(front=front,conf=conf)
+        rank.to_csv('./outputs/rank.csv',index=False)
+    
 
 if __name__=='__main__':
     test=int([i for i in sys.argv if i.startswith('quick_test=')][0].split('=')[1])
